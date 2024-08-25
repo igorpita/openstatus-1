@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: openstatus_user
+      POSTGRES_PASSWORD: openstatus_Pass123
+      POSTGRES_DB: openstatus_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - openstatus-net
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+
+  openstatus:
+    image: openstatus:latest.
+    environment:
+      DATABASE_URL: postgresql://openstatus_user:openstatus_Pass123@postgres:5432/openstatus_db
+    networks:
+      - openstatus-net
+    deploy:
+      replicas: 3
+      update_config:
+        parallelism: 2
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+    ports:
+      - "3000:3000"
+
+volumes:
+  postgres_data:
+
+networks:
+  openstatus-net:
+    driver: overlay
